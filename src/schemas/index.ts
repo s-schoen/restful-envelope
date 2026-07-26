@@ -1,1 +1,1 @@
-export {};
+export { problemDetailsSchema } from "./error.js";

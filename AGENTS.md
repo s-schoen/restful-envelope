@@ -8,6 +8,7 @@ The library should be able to be used in both backend (Node.js) and frontend (br
 - This is one ESM-only library
 - There are two public APIs: `src/index.ts` backs `@s-schoen/restful-envelope`, and `src/schemas/index.ts` backs `@s-schoen/restful-envelope/schemas`. New modules are not public until re-exported from the appropriate entrypoint.
 - TypeScript uses `NodeNext`, `verbatimModuleSyntax`, and `erasableSyntaxOnly`. Relative source imports need `.js` suffixes; use type-only imports where required and avoid TypeScript syntax that emits runtime code.
+- Always import Zod from the explicit `zod/v4` entrypoint, including in documentation and examples.
 
 ## Verification
 
