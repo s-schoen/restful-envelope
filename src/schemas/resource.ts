@@ -1,8 +1,6 @@
 import { z } from "zod/v4";
 
-function isResourceObject(value: unknown): value is object {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
+import { createValidatedResourceSchema } from "./utils.js";
 
 /**
  * Creates a strict schema for a response containing one resource.
@@ -14,10 +12,7 @@ export function createResourceResponseSchema<
   const ResourceOutput extends object,
   const ResourceInput extends object,
 >(resourceSchema: z.ZodType<ResourceOutput, ResourceInput>) {
-  const validatedResourceSchema = z
-    .custom<ResourceInput>(isResourceObject, "Expected resource object")
-    .pipe(resourceSchema)
-    .refine((value) => isResourceObject(value), "Expected resource object");
+  const validatedResourceSchema = createValidatedResourceSchema(resourceSchema);
 
   return z.strictObject({ data: validatedResourceSchema });
 }

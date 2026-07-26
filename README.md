@@ -2,8 +2,9 @@
 
 An ESM-only TypeScript library for REST API envelopes.
 
-Provides typed single-resource response construction and strict Zod validation. See the
-[resource response guide](./docs/resource.md) for the response contract and usage examples.
+Provides typed single-resource and collection response construction with strict Zod validation.
+See the [resource response guide](./docs/resource.md) and
+[collection response guide](./docs/collection.md) for their response contracts and usage examples.
 
 Supports error responses based on
 [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html), including typed response
