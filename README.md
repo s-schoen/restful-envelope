@@ -7,6 +7,10 @@ Supports error responses based on
 creation and Zod validation. See the [error response guide](./docs/error.md) for details and
 examples.
 
+Also provides typed health endpoint responses with aggregate and component-level statuses, HTTP
+status mapping, and Zod validation. See the [health response guide](./docs/health.md) for details
+and examples.
+
 ## License
 
 [MIT](./LICENSE)
