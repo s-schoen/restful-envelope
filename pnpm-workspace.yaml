@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+blockExoticSubdeps: true
+minimumReleaseAge: 1440
+minimumReleaseAgeIgnoreMissingTime: false
+minimumReleaseAgeStrict: true
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  # @types/node 22 requires this signed Undici release, published before provenance was consistent.
+  - undici-types@6.21.0

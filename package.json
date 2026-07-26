@@ -1,0 +1,68 @@
+{
+  "name": "@s-schoen/restful-envelope",
+  "version": "0.1.0",
+  "homepage": "https://github.com/s-schoen/restful-envelope#readme",
+  "bugs": {
+    "url": "https://github.com/s-schoen/restful-envelope/issues"
+  },
+  "license": "MIT",
+  "author": "s-schoen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s-schoen/restful-envelope.git"
+  },
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schemas": {
+      "types": "./dist/schemas/index.d.ts",
+      "default": "./dist/schemas/index.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "changeset": "changeset && oxfmt --write .changeset",
+    "changeset:version": "changeset version && oxfmt --write .",
+    "check:package": "pnpm run build && publint",
+    "format": "oxfmt --write .",
+    "format:check": "oxfmt --check .",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "verify": "pnpm run format:check && pnpm run lint && pnpm run test:coverage && pnpm run check:package"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.31.1",
+    "@types/node": "22.20.1",
+    "@vitest/coverage-v8": "4.1.10",
+    "oxfmt": "0.60.0",
+    "oxlint": "1.75.0",
+    "oxlint-tsgolint": "7.0.2001",
+    "publint": "0.3.22",
+    "typescript": "7.0.2",
+    "vite": "8.1.5",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@11.17.0"
+}
