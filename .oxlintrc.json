@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["eslint", "import", "node", "oxc", "typescript", "unicorn", "vitest", "jsdoc"],
+  "plugins": ["eslint", "import", "oxc", "typescript", "unicorn", "vitest", "jsdoc"],
   "categories": {
     "correctness": "error"
   },
@@ -11,21 +11,32 @@
   "options": {
     "maxWarnings": 0,
     "reportUnusedDisableDirectives": "error",
+    "respectEslintDisableDirectives": false,
     "typeAware": true,
     "typeCheck": true
   },
   "rules": {
+    "eslint/array-callback-return": "error",
+    "eslint/eqeqeq": "error",
     "eslint/no-array-constructor": "off",
+    "eslint/no-case-declarations": "error",
     "eslint/no-implied-eval": "off",
+    "eslint/no-new-wrappers": "error",
+    "eslint/no-promise-executor-return": "error",
+    "eslint/no-prototype-builtins": "error",
     "eslint/no-throw-literal": "off",
     "eslint/no-unused-expressions": "off",
     "eslint/no-unused-vars": "off",
     "eslint/no-useless-constructor": "off",
+    "eslint/no-var": "error",
+    "eslint/prefer-const": "error",
     "eslint/prefer-promise-reject-errors": "off",
     "eslint/require-await": "off",
+    "import/no-absolute-path": "error",
     "import/no-commonjs": "error",
     "import/no-cycle": "error",
     "import/no-duplicates": "error",
+    "import/no-nodejs-modules": "error",
     "typescript/await-thenable": "error",
     "typescript/ban-ts-comment": ["error", { "minimumDescriptionLength": 10 }],
     "typescript/no-array-constructor": "error",
@@ -43,6 +54,7 @@
     "typescript/no-floating-promises": "error",
     "typescript/no-for-in-array": "error",
     "typescript/no-implied-eval": "error",
+    "typescript/no-import-type-side-effects": "error",
     "typescript/no-invalid-void-type": "error",
     "typescript/no-meaningless-void-operator": "error",
     "typescript/no-misused-new": "error",
@@ -72,6 +84,7 @@
     "typescript/no-unsafe-function-type": "error",
     "typescript/no-unsafe-member-access": "error",
     "typescript/no-unsafe-return": "error",
+    "typescript/no-unsafe-type-assertion": "error",
     "typescript/no-unsafe-unary-minus": "error",
     "typescript/no-unused-expressions": "error",
     "typescript/no-unused-vars": "error",
@@ -109,19 +122,25 @@
       }
     ],
     "typescript/return-await": ["error", "error-handling-correctness-only"],
+    "typescript/switch-exhaustiveness-check": "error",
     "typescript/triple-slash-reference": "error",
     "typescript/unbound-method": "error",
     "typescript/unified-signatures": "error",
     "typescript/use-unknown-in-catch-callback-variable": "error",
+    "unicorn/no-accessor-recursion": "error",
     "unicorn/prefer-node-protocol": "error",
     "vitest/expect-expect": "error",
+    "vitest/no-identical-title": "error",
     "vitest/no-standalone-expect": "error"
   },
   "overrides": [
     {
-      "files": ["vitest.config.ts"],
+      "files": ["**/*.test.ts", "scripts/**/*.mjs", "vitest.config.ts"],
       "env": {
         "node": true
+      },
+      "rules": {
+        "import/no-nodejs-modules": "off"
       }
     }
   ]
