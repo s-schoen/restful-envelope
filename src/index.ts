@@ -1,4 +1,8 @@
-export { createCollectionResponse, createUnpaginatedCollectionResponse } from "./collection.js";
+export {
+  createCollectionResponse,
+  createCollectionResponseFromLookahead,
+  createUnpaginatedCollectionResponse,
+} from "./collection.js";
 export type { CollectionResponse } from "./collection.js";
 export {
   ABOUT_BLANK_PROBLEM_TYPE,

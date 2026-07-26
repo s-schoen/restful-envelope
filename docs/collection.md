@@ -62,12 +62,18 @@ const response = createUnpaginatedCollectionResponse([
 ]);
 ```
 
+Use `createCollectionResponseFromLookahead()` when a database query fetches up to `limit + 1`
+resources. The helper removes the extra resource, derives `nextOffset`, and optionally includes an
+exact `total`. An input containing exactly `limit` resources is a final page because the requested
+lookahead resource was not returned. The helper creates a shallow data-array copy and throws a
+`RangeError` if the input contains more than `limit + 1` resources.
+
 ## Backend With Hono
 
 ```ts
 import { Hono } from "hono";
 import { z } from "zod/v4";
-import { createCollectionResponse } from "@s-schoen/restful-envelope";
+import { createCollectionResponseFromLookahead } from "@s-schoen/restful-envelope";
 
 const app = new Hono();
 const users = [
@@ -82,15 +88,13 @@ const paginationQuerySchema = z.object({
 
 app.get("/users", (c) => {
   const { offset, limit } = paginationQuerySchema.parse(c.req.query());
-  const data = users.slice(offset, offset + limit);
-  const afterPage = offset + data.length;
-  const nextOffset = afterPage < users.length ? afterPage : null;
+  // A database query would use OFFSET offset and LIMIT limit + 1.
+  const rows = users.slice(offset, offset + limit + 1);
 
   return c.json(
-    createCollectionResponse(data, {
+    createCollectionResponseFromLookahead(rows, {
       offset,
       limit,
-      nextOffset,
       total: users.length,
     }),
   );

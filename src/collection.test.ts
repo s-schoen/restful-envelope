@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, test } from "vitest";
 
 import {
   createCollectionResponse,
+  createCollectionResponseFromLookahead,
   createUnpaginatedCollectionResponse,
   type CollectionResponse,
 } from "./index.js";
@@ -84,5 +85,89 @@ describe("createUnpaginatedCollectionResponse", () => {
         total: 0,
       },
     });
+  });
+});
+
+describe("createCollectionResponseFromLookahead", () => {
+  test("removes the lookahead resource and creates a continuation offset", () => {
+    const rows: readonly User[] = [
+      { id: "user-42", name: "Ada" },
+      { id: "user-43", name: "Grace" },
+      { id: "user-44", name: "Katherine" },
+    ];
+
+    const response = createCollectionResponseFromLookahead(rows, {
+      offset: 10,
+      limit: 2,
+    });
+
+    expect(response).toEqual({
+      data: [rows[0], rows[1]],
+      pagination: {
+        offset: 10,
+        limit: 2,
+        nextOffset: 12,
+      },
+    });
+    expect(response.data).not.toBe(rows);
+    expect(response.data[0]).toBe(rows[0]);
+    expect(response.pagination).not.toHaveProperty("total");
+    expectTypeOf(response).toEqualTypeOf<CollectionResponse<User>>();
+  });
+
+  test("treats a full page without a lookahead resource as the final page", () => {
+    const rows: User[] = [
+      { id: "user-42", name: "Ada" },
+      { id: "user-43", name: "Grace" },
+    ];
+
+    expect(
+      createCollectionResponseFromLookahead(rows, {
+        offset: 10,
+        limit: 2,
+        total: 12,
+      }),
+    ).toEqual({
+      data: rows,
+      pagination: {
+        offset: 10,
+        limit: 2,
+        nextOffset: null,
+        total: 12,
+      },
+    });
+  });
+
+  test("preserves a zero total for an empty result", () => {
+    expect(
+      createCollectionResponseFromLookahead<User>([], {
+        offset: 0,
+        limit: 20,
+        total: 0,
+      }),
+    ).toEqual({
+      data: [],
+      pagination: {
+        offset: 0,
+        limit: 20,
+        nextOffset: null,
+        total: 0,
+      },
+    });
+  });
+
+  test("rejects more than one lookahead resource", () => {
+    const rows: User[] = [
+      { id: "user-42", name: "Ada" },
+      { id: "user-43", name: "Grace" },
+      { id: "user-44", name: "Katherine" },
+    ];
+
+    expect(() =>
+      createCollectionResponseFromLookahead(rows, {
+        offset: 0,
+        limit: 1,
+      }),
+    ).toThrow(RangeError);
   });
 });

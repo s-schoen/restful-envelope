@@ -30,6 +30,33 @@ export function createCollectionResponse<T extends object>(
 }
 
 /**
+ * Creates a collection response from a query result containing up to one lookahead resource.
+ *
+ * @throws {RangeError} When `rows` contains more than `limit + 1` resources.
+ */
+export function createCollectionResponseFromLookahead<T extends object>(
+  rows: readonly T[],
+  options: {
+    offset: number;
+    limit: number;
+    total?: number;
+  },
+): CollectionResponse<T> {
+  if (rows.length > options.limit + 1) {
+    throw new RangeError("Lookahead result cannot contain more than limit + 1 resources");
+  }
+
+  const data = rows.slice(0, options.limit);
+  const nextOffset = rows.length === options.limit + 1 ? options.offset + data.length : null;
+  const pagination =
+    options.total === undefined
+      ? { offset: options.offset, limit: options.limit, nextOffset }
+      : { offset: options.offset, limit: options.limit, nextOffset, total: options.total };
+
+  return createCollectionResponse(data, pagination);
+}
+
+/**
  * Wraps a complete resource collection in an envelope that has no following page.
  */
 export function createUnpaginatedCollectionResponse<T extends object>(
