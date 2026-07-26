@@ -9,6 +9,11 @@ updates:
       timezone: Europe/Berlin
     open-pull-requests-limit: 5
     versioning-strategy: increase
+    ignore:
+      # Keep compile-time Node APIs aligned with the minimum supported runtime.
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-major
     groups:
       typescript-oxlint:
         dependency-type: development
