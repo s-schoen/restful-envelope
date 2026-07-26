@@ -13,3 +13,5 @@ export type {
   ProblemType,
   ProblemTypeDefinition,
 } from "./error.js";
+export { getHealthHTTPStatusCode } from "./health.js";
+export type { ComponentHealthStatus, HealthResponse, HealthStatus } from "./health.js";
