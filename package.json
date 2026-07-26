@@ -41,6 +41,7 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "lint": "oxlint .",
+    "lint:agent": "oxlint --format=agent .",
     "lint:fix": "oxlint --fix .",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

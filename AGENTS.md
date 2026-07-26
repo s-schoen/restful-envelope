@@ -12,6 +12,7 @@ The library should be able to be used in both backend (Node.js) and frontend (br
 ## Verification
 
 - Run the CI-equivalent check with `pnpm verify`. Its required sequence is format check, type-aware lint, coverage tests, then build plus `publint`.
+- Prefer `pnpm lint:agent` for compact Oxlint diagnostics optimized for AI agents. Oxfmt has no agent output format; use `pnpm format:check` for formatting diagnostics.
 - Tests are colocated as `src/**/*.test.ts` and run in Vitest's Node environment.
 - Run one file with `pnpm exec vitest run src/path/to/file.test.ts`; focus a test with `pnpm exec vitest run src/path/to/file.test.ts -t "test name"`.
 
