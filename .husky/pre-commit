@@ -1,0 +1,9 @@
+git diff --cached --name-only --diff-filter=ACMR -z -- \
+  "*.js" "*.jsx" "*.mjs" "*.cjs" "*.ts" "*.tsx" "*.mts" "*.cts" |
+  xargs -0 sh -c '[ "$#" -eq 0 ] || pnpm exec oxlint -- "$@"' sh
+
+git diff --cached --name-only --diff-filter=ACMR -z -- \
+  "*.js" "*.jsx" "*.mjs" "*.cjs" "*.ts" "*.tsx" "*.mts" "*.cts" \
+  "*.json" "*.jsonc" "*.yaml" "*.yml" "*.md" "*.mdx" \
+  "*.css" "*.scss" "*.less" "*.html" "*.vue" "*.svelte" "*.astro" |
+  xargs -0 sh -c '[ "$#" -eq 0 ] || pnpm exec oxfmt --check -- "$@"' sh

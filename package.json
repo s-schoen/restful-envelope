@@ -43,6 +43,7 @@
     "lint": "oxlint .",
     "lint:agent": "oxlint --format=agent .",
     "lint:fix": "oxlint --fix .",
+    "prepare": "husky",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "verify": "pnpm run format:check && pnpm run lint && pnpm run test:coverage && pnpm run check:package"
@@ -54,6 +55,7 @@
     "@changesets/cli": "2.31.1",
     "@types/node": "22.20.1",
     "@vitest/coverage-v8": "4.1.10",
+    "husky": "9.1.7",
     "oxfmt": "0.60.0",
     "oxlint": "1.75.0",
     "oxlint-tsgolint": "7.0.2001",
