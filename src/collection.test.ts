@@ -1,6 +1,10 @@
 import { describe, expect, expectTypeOf, test } from "vitest";
 
-import { createCollectionResponse, type CollectionResponse } from "./index.js";
+import {
+  createCollectionResponse,
+  createUnpaginatedCollectionResponse,
+  type CollectionResponse,
+} from "./index.js";
 
 interface User {
   id: string;
@@ -45,5 +49,40 @@ describe("createCollectionResponse", () => {
     });
 
     expect(true).toBe(true);
+  });
+});
+
+describe("createUnpaginatedCollectionResponse", () => {
+  test("wraps a complete collection with final-page pagination", () => {
+    const users: User[] = [
+      { id: "user-42", name: "Ada" },
+      { id: "user-43", name: "Grace" },
+    ];
+
+    const response = createUnpaginatedCollectionResponse(users);
+
+    expect(response).toEqual({
+      data: users,
+      pagination: {
+        offset: 0,
+        limit: 2,
+        nextOffset: null,
+        total: 2,
+      },
+    });
+    expect(response.data).toBe(users);
+    expectTypeOf(response).toEqualTypeOf<CollectionResponse<User>>();
+  });
+
+  test("uses the minimum valid limit for an empty collection", () => {
+    expect(createUnpaginatedCollectionResponse<User>([])).toEqual({
+      data: [],
+      pagination: {
+        offset: 0,
+        limit: 1,
+        nextOffset: null,
+        total: 0,
+      },
+    });
   });
 });

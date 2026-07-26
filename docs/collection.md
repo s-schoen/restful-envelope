@@ -48,6 +48,20 @@ object. Use `createCollectionResponse()` to construct the envelope while inferri
 retains the data array and pagination object by reference and does not clone, freeze, or validate
 them.
 
+Use `createUnpaginatedCollectionResponse()` when an endpoint deliberately returns its complete
+collection at once. It accepts only the data array and creates final-page metadata with an offset of
+zero, a `null` `nextOffset`, and an exact `total`. Its limit equals the number of resources, except
+that an empty collection uses the minimum valid limit of one.
+
+```ts
+import { createUnpaginatedCollectionResponse } from "@s-schoen/restful-envelope";
+
+const response = createUnpaginatedCollectionResponse([
+  { id: "user-42", name: "Ada" },
+  { id: "user-43", name: "Grace" },
+]);
+```
+
 ## Backend With Hono
 
 ```ts

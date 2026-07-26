@@ -28,3 +28,17 @@ export function createCollectionResponse<T extends object>(
 ): CollectionResponse<T> {
   return { data, pagination };
 }
+
+/**
+ * Wraps a complete resource collection in an envelope that has no following page.
+ */
+export function createUnpaginatedCollectionResponse<T extends object>(
+  data: T[],
+): CollectionResponse<T> {
+  return createCollectionResponse(data, {
+    offset: 0,
+    limit: Math.max(1, data.length),
+    nextOffset: null,
+    total: data.length,
+  });
+}
