@@ -93,6 +93,47 @@ app.post("/profiles", async (c) => {
 });
 ```
 
+## Shared Schema-Backed Contracts
+
+Use `defineProblemContract()` when producers and consumers share a Zod dependency. It derives
+creation input and parsed output types from one extension shape, validates occurrences during
+creation, and exposes a response schema for the same problem type:
+
+```ts
+import { z } from "zod/v4";
+import { defineProblemContract } from "@s-schoen/restful-envelope/schemas";
+
+export const validationProblem = defineProblemContract({
+  type: "https://api.example.com/problems/validation",
+  title: "Request validation failed",
+  status: 422,
+  extensions: {
+    errors: z.array(
+      z.object({
+        detail: z.string(),
+        pointer: z.string(),
+      }),
+    ),
+  },
+});
+
+const problem = validationProblem.create({
+  detail: "The profile contains invalid fields.",
+  errors: [{ detail: "Must be at least 18", pointer: "#/age" }],
+});
+
+const parsedProblem = validationProblem.schema.parse(await response.json());
+```
+
+The contract exposes literal `type` and `status` values. `create()` validates synchronously,
+applies extension transforms and defaults, emits the canonical title, rejects undeclared members,
+and returns a shallow-frozen object. Asynchronous extension schemas can be parsed with
+`schema.parseAsync()`, but cannot be used through `create()`.
+
+For response parsing, the schema requires the contract's `type` and `status`, accepts localized
+nonempty titles, and preserves undeclared extension members as `unknown`. This allows a consumer to
+accept extensions added by a newer producer without losing them.
+
 ## Frontend With Fetch
 
 Use `problemDetailsSchema` when no problem-specific extensions are expected:
@@ -113,7 +154,8 @@ if (!response.ok) {
 }
 ```
 
-For a known problem type, use Zod's `safeExtend()` to validate and infer its extensions:
+When no shared schema-backed contract is available, use Zod's `safeExtend()` to validate and infer
+extensions for a known problem type:
 
 ```ts
 import { z } from "zod/v4";
