@@ -134,6 +134,62 @@ For response parsing, the schema requires the contract's `type` and `status`, ac
 nonempty titles, and preserves undeclared extension members as `unknown`. This allows a consumer to
 accept extensions added by a newer producer without losing them.
 
+## Problem Type Unions
+
+Use `createProblemDetailsUnionSchema()` to combine the problem contracts supported by an endpoint
+into a closed Zod discriminated union:
+
+```ts
+import { z } from "zod/v4";
+import {
+  createProblemDetailsUnionSchema,
+  defineProblemContract,
+} from "@s-schoen/restful-envelope/schemas";
+
+const validationProblem = defineProblemContract({
+  type: "https://api.example.com/problems/validation",
+  title: "Request validation failed",
+  status: 422,
+  extensions: {
+    errors: z.array(z.string()),
+  },
+});
+
+const conflictProblem = defineProblemContract({
+  type: "https://api.example.com/problems/conflict",
+  title: "Conflict",
+  status: 409,
+  extensions: {
+    conflictingId: z.string(),
+  },
+});
+
+const endpointProblemSchema = createProblemDetailsUnionSchema(validationProblem, conflictProblem);
+
+declare const problemBody: unknown;
+
+const problem = endpointProblemSchema.parse(problemBody);
+
+switch (problem.type) {
+  case validationProblem.type:
+    problem.errors;
+    break;
+  case conflictProblem.type:
+    problem.conflictingId;
+    break;
+  default:
+    problem satisfies never;
+}
+```
+
+The schema rejects problem types absent from the supplied contracts. Use `problemDetailsSchema`
+separately when an application needs to accept arbitrary Problem Details.
+
+Every supplied contract must have a unique `type`; duplicates are rejected when the schema is
+created. Consequently, a union cannot contain multiple `about:blank` contracts distinguished only
+by status. A single-contract union is supported, although using that contract's `schema` directly
+is simpler.
+
 ## Frontend With Fetch
 
 Use `problemDetailsSchema` when no problem-specific extensions are expected:

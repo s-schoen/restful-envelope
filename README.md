@@ -9,7 +9,7 @@ An opinionated library to return structured data in a restful API.
 ## Key Features
 
 Defines types and Zod schemas for uniform REST API responses, including schema-backed Problem
-Details contracts that can be shared by producers and consumers.
+Details contracts and discriminated unions that can be shared by producers and consumers.
 
 Supported response types:
 
