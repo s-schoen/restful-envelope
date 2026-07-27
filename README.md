@@ -1,19 +1,52 @@
-# @s-schoen/restful-envelope
+# Restful Envelope
 
-An ESM-only TypeScript library for REST API envelopes.
+[![CI](https://github.com/s-schoen/restful-envelope/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/s-schoen/restful-envelope/actions/workflows/ci.yml)
+[![Test Coverage](https://codecov.io/gh/s-schoen/restful-envelope/branch/master/graph/badge.svg)](https://codecov.io/gh/s-schoen/restful-envelope)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-Provides typed single-resource and collection response construction with strict Zod validation.
-See the [resource response guide](./docs/resource.md) and
-[collection response guide](./docs/collection.md) for their response contracts and usage examples.
+An opinionated library to return structured data in a restful API.
 
-Supports error responses based on
-[RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html), including typed response
-creation and Zod validation. See the [error response guide](./docs/error.md) for details and
-examples.
+## Key Features
 
-Also provides typed health endpoint responses with aggregate and component-level statuses, HTTP
-status mapping, and Zod validation. See the [health response guide](./docs/health.md) for details
-and examples.
+Defines types and Zod schemas for uniform REST API responses.
+
+Supported response types:
+
+- [Error responses](./docs/error.md) according to [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)
+- [Service health](./docs/health.md)
+- Generic [single resource responses](./docs/resource.md)
+- Generic [collection responses](./docs/collection.md) including pagination support
+
+## Getting Started
+
+### Backend
+
+```ts
+import { createResourceResponse } from "@s-schoen/restful-envelope";
+
+const user = { id: "user-42", name: "Ada" };
+
+return Response.json(createResourceResponse(user));
+```
+
+### Frontend
+
+```ts
+import { z } from "zod/v4";
+import { createResourceResponseSchema } from "@s-schoen/restful-envelope/schemas";
+
+const userResponseSchema = createResourceResponseSchema(
+  z.object({ id: z.string(), name: z.string() }),
+);
+
+const response = await fetch("/users/user-42");
+
+if (!response.ok) {
+  throw new Error(`Request failed with status ${response.status}.`);
+}
+
+const { data: user } = userResponseSchema.parse(await response.json());
+```
 
 ## License
 
