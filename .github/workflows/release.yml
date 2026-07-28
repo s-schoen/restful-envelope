@@ -65,7 +65,7 @@ jobs:
         env:
           PACKAGE_NAME: ${{ steps.package.outputs.name }}
           PACKAGE_VERSION: ${{ steps.package.outputs.version }}
-        run: bash .release-tooling/scripts/validate-release-artifact.sh artifacts "$PACKAGE_NAME" "$PACKAGE_VERSION"
+        run: bash .tmp/release-tooling/scripts/validate-release-artifact.sh artifacts "$PACKAGE_NAME" "$PACKAGE_VERSION"
 
       - name: Upload release artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
