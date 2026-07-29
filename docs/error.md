@@ -142,6 +142,57 @@ For response parsing, the schema requires the contract's `type` and `status`, ac
 nonempty titles, and preserves undeclared extension members as `unknown`. This allows a consumer to
 accept extensions added by a newer producer without losing them.
 
+## Request Validation With Hono
+
+Use `defineZodValidationProblemContract()` with `@hono/zod-validator` to convert a failed Zod
+validation result into a schema-backed `400 Bad Request` problem:
+
+```ts
+import { zValidator } from "@hono/zod-validator";
+import { Hono } from "hono";
+import { z } from "zod/v4";
+import { PROBLEM_JSON_MEDIA_TYPE } from "@s-schoen/restful-envelope";
+import { defineZodValidationProblemContract } from "@s-schoen/restful-envelope/schemas";
+
+const profileSchema = z.object({
+  age: z.number().int().min(18),
+  name: z.string().min(1),
+});
+
+const requestValidationProblem = defineZodValidationProblemContract({
+  type: "https://api.example.com/problems/request-validation",
+  title: "Request validation failed",
+});
+
+const app = new Hono();
+
+app.post(
+  "/profiles",
+  zValidator("json", profileSchema, (result) => {
+    if (result.success) {
+      return;
+    }
+
+    const problem = requestValidationProblem.createFromZodError(result.error);
+
+    return new Response(JSON.stringify(problem), {
+      status: problem.status,
+      headers: { "Content-Type": PROBLEM_JSON_MEDIA_TYPE },
+    });
+  }),
+  (c) => c.json({ profile: c.req.valid("json") }, 201),
+);
+```
+
+The factory fixes `status` to `400` while the caller owns the stable `type` and `title`. It returns a
+normal `ProblemContract`, so manually supplied occurrences can still be created with `create()` and
+responses can be parsed with `schema`.
+
+Each top-level Zod issue becomes an `errors` entry containing its message as `detail` and, when its
+path is JSON-compatible, an RFC 6901 URI-fragment `pointer`. Pointers are relative to the value
+validated by Zod, so `#/age` refers to the `age` member of the Hono `json` target in this example.
+Malformed JSON is rejected by Hono before Zod runs and therefore requires separate error handling.
+
 ## Problem Type Unions
 
 Use `createProblemDetailsUnionSchema()` to combine the problem contracts supported by an endpoint
