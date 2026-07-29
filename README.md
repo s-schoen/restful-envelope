@@ -20,6 +20,12 @@ Supported response types:
 
 ## Getting Started
 
+Install the library:
+
+```shell
+npm i @s-schoen/restful-envelope
+```
+
 ### Backend
 
 ```ts

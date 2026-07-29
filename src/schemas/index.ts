@@ -4,3 +4,5 @@ export type { ProblemContract } from "./error.js";
 export { healthResponseSchema } from "./health.js";
 export { createProblemDetailsUnionSchema } from "./problem-union.js";
 export { createResourceResponseSchema } from "./resource.js";
+export { defineZodValidationProblemContract } from "./zod-validation.js";
+export type { ZodValidationIssue, ZodValidationProblemContract } from "./zod-validation.js";
