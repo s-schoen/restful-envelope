@@ -24,8 +24,16 @@ remain optional. If no extension type is supplied, additional members are expose
 
 Use `defineProblemType<Extensions>()` to define stable `type`, `title`, and `status` values once.
 Its `create()` method combines them with occurrence-specific details and typed extensions. Generic
-HTTP errors are available through `badRequestProblem`, `notFoundProblem`, and
-`internalServerErrorProblem`.
+HTTP errors are available as reusable `about:blank` definitions:
+
+- `badRequestProblem` (`400`)
+- `unauthorizedProblem` (`401`)
+- `forbiddenProblem` (`403`)
+- `notFoundProblem` (`404`)
+- `methodNotAllowedProblem` (`405`)
+- `conflictProblem` (`409`)
+- `unsupportedMediaTypeProblem` (`415`)
+- `internalServerErrorProblem` (`500`)
 
 The HTTP response status must match the body's `status`, and JSON responses must use
 `application/problem+json`.

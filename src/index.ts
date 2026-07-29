@@ -8,9 +8,14 @@ export {
   ABOUT_BLANK_PROBLEM_TYPE,
   PROBLEM_JSON_MEDIA_TYPE,
   badRequestProblem,
+  conflictProblem,
   defineProblemType,
+  forbiddenProblem,
   internalServerErrorProblem,
+  methodNotAllowedProblem,
   notFoundProblem,
+  unauthorizedProblem,
+  unsupportedMediaTypeProblem,
 } from "./error.js";
 export type {
   CreatedProblemDetails,
