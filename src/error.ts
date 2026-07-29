@@ -87,6 +87,15 @@ type CreateProblemArguments<Extensions extends object> =
     ? [occurrence?: ProblemOccurrence<Extensions>]
     : [occurrence: ProblemOccurrence<Extensions>];
 
+type DefinedProblemType<
+  Definition extends ProblemTypeDefinition,
+  Extensions extends object,
+> = Readonly<{
+  create(
+    ...arguments_: CreateProblemArguments<Extensions>
+  ): Readonly<Definition & ProblemOccurrence<Extensions>>;
+}>;
+
 /**
  * An immutable, reusable definition that creates occurrences of one problem type.
  *
@@ -100,6 +109,29 @@ export interface ProblemType<Extensions extends object = EmptyProblemExtensions>
    * the caller's responsibility.
    */
   create(...arguments_: CreateProblemArguments<Extensions>): CreatedProblemDetails<Extensions>;
+}
+
+function createProblemType<
+  const Definition extends ProblemTypeDefinition,
+  Extensions extends object = EmptyProblemExtensions,
+>(definition: Definition): DefinedProblemType<Definition, Extensions> {
+  if (!Number.isInteger(definition.status) || definition.status < 100 || definition.status > 599) {
+    throw new RangeError("Problem type status must be an integer between 100 and 599.");
+  }
+
+  if (definition.title.length === 0) {
+    throw new TypeError("Problem type title must not be empty.");
+  }
+
+  const fixedDefinition = Object.freeze({ ...definition });
+
+  return Object.freeze({
+    create(
+      ...arguments_: CreateProblemArguments<Extensions>
+    ): Readonly<Definition & ProblemOccurrence<Extensions>> {
+      return Object.freeze(Object.assign({}, arguments_[0], fixedDefinition));
+    },
+  });
 }
 
 /**
@@ -128,40 +160,47 @@ export interface ProblemType<Extensions extends object = EmptyProblemExtensions>
 export function defineProblemType<Extensions extends object = EmptyProblemExtensions>(
   definition: ProblemTypeDefinition,
 ): ProblemType<Extensions> {
-  if (!Number.isInteger(definition.status) || definition.status < 100 || definition.status > 599) {
-    throw new RangeError("Problem type status must be an integer between 100 and 599.");
-  }
+  return createProblemType<ProblemTypeDefinition, Extensions>(definition);
+}
 
-  if (definition.title.length === 0) {
-    throw new TypeError("Problem type title must not be empty.");
-  }
-
-  const fixedDefinition = Object.freeze({ ...definition });
-
-  return Object.freeze({
-    create(...arguments_: CreateProblemArguments<Extensions>): CreatedProblemDetails<Extensions> {
-      return Object.freeze(Object.assign({}, arguments_[0], fixedDefinition));
-    },
+function defineAboutBlankProblem<const Status extends number, const Title extends string>(
+  status: Status,
+  title: Title,
+): DefinedProblemType<
+  {
+    readonly status: Status;
+    readonly title: Title;
+    readonly type: typeof ABOUT_BLANK_PROBLEM_TYPE;
+  },
+  EmptyProblemExtensions
+> {
+  return createProblemType({
+    type: ABOUT_BLANK_PROBLEM_TYPE,
+    title,
+    status,
   });
 }
 
 /** A reusable `400 Bad Request` problem using the `about:blank` problem type. */
-export const badRequestProblem = defineProblemType({
-  type: ABOUT_BLANK_PROBLEM_TYPE,
-  title: "Bad Request",
-  status: 400,
-});
+export const badRequestProblem = defineAboutBlankProblem(400, "Bad Request");
+
+/** A reusable `401 Unauthorized` problem using the `about:blank` problem type. */
+export const unauthorizedProblem = defineAboutBlankProblem(401, "Unauthorized");
+
+/** A reusable `403 Forbidden` problem using the `about:blank` problem type. */
+export const forbiddenProblem = defineAboutBlankProblem(403, "Forbidden");
 
 /** A reusable `404 Not Found` problem using the `about:blank` problem type. */
-export const notFoundProblem = defineProblemType({
-  type: ABOUT_BLANK_PROBLEM_TYPE,
-  title: "Not Found",
-  status: 404,
-});
+export const notFoundProblem = defineAboutBlankProblem(404, "Not Found");
+
+/** A reusable `405 Method Not Allowed` problem using the `about:blank` problem type. */
+export const methodNotAllowedProblem = defineAboutBlankProblem(405, "Method Not Allowed");
+
+/** A reusable `409 Conflict` problem using the `about:blank` problem type. */
+export const conflictProblem = defineAboutBlankProblem(409, "Conflict");
+
+/** A reusable `415 Unsupported Media Type` problem using the `about:blank` problem type. */
+export const unsupportedMediaTypeProblem = defineAboutBlankProblem(415, "Unsupported Media Type");
 
 /** A reusable `500 Internal Server Error` problem using the `about:blank` problem type. */
-export const internalServerErrorProblem = defineProblemType({
-  type: ABOUT_BLANK_PROBLEM_TYPE,
-  title: "Internal Server Error",
-  status: 500,
-});
+export const internalServerErrorProblem = defineAboutBlankProblem(500, "Internal Server Error");

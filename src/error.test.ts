@@ -2,13 +2,61 @@ import { describe, expect, expectTypeOf, test } from "vitest";
 
 import {
   ABOUT_BLANK_PROBLEM_TYPE,
+  badRequestProblem,
+  conflictProblem,
   defineProblemType,
+  forbiddenProblem,
+  internalServerErrorProblem,
+  methodNotAllowedProblem,
   notFoundProblem,
   type ProblemDetails,
   type ProblemType,
+  unauthorizedProblem,
+  unsupportedMediaTypeProblem,
 } from "./index.js";
 
+const defaultProblemCases = [
+  { problemType: badRequestProblem, status: 400, title: "Bad Request" },
+  { problemType: unauthorizedProblem, status: 401, title: "Unauthorized" },
+  { problemType: forbiddenProblem, status: 403, title: "Forbidden" },
+  { problemType: notFoundProblem, status: 404, title: "Not Found" },
+  { problemType: methodNotAllowedProblem, status: 405, title: "Method Not Allowed" },
+  { problemType: conflictProblem, status: 409, title: "Conflict" },
+  {
+    problemType: unsupportedMediaTypeProblem,
+    status: 415,
+    title: "Unsupported Media Type",
+  },
+  {
+    problemType: internalServerErrorProblem,
+    status: 500,
+    title: "Internal Server Error",
+  },
+] as const;
+
 describe("defineProblemType", () => {
+  test.each(defaultProblemCases)(
+    "creates the default $status problem",
+    ({ problemType, ...expected }) => {
+      expect(problemType.create()).toEqual({
+        type: ABOUT_BLANK_PROBLEM_TYPE,
+        ...expected,
+      });
+    },
+  );
+
+  test("preserves default problem status literals", () => {
+    expectTypeOf(badRequestProblem.create().status).toEqualTypeOf<400>();
+    expectTypeOf(unauthorizedProblem.create().status).toEqualTypeOf<401>();
+    expectTypeOf(forbiddenProblem.create().status).toEqualTypeOf<403>();
+    expectTypeOf(notFoundProblem.create().status).toEqualTypeOf<404>();
+    expectTypeOf(methodNotAllowedProblem.create().status).toEqualTypeOf<405>();
+    expectTypeOf(conflictProblem.create().status).toEqualTypeOf<409>();
+    expectTypeOf(unsupportedMediaTypeProblem.create().status).toEqualTypeOf<415>();
+    expectTypeOf(internalServerErrorProblem.create().status).toEqualTypeOf<500>();
+    expectTypeOf(conflictProblem.create().title).toEqualTypeOf<"Conflict">();
+  });
+
   test("creates immutable problem details", () => {
     const problem = notFoundProblem.create({
       detail: "No customer exists with that identifier.",
