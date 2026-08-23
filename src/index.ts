@@ -26,5 +26,12 @@ export type {
 } from "./error.js";
 export { getHealthHTTPStatusCode } from "./health.js";
 export type { ComponentHealthStatus, HealthResponse, HealthStatus } from "./health.js";
+export { annotateIdentifier, generateIdentifier, parseIdentifier } from "./identifier.js";
+export type {
+  Identifier,
+  IdentifierFormatOptions,
+  IdentifierGenerateOptions,
+  IdentifierParseOptions,
+} from "./identifier.js";
 export { createResourceResponse } from "./resource.js";
 export type { ResourceResponse } from "./resource.js";
