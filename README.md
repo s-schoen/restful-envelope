@@ -15,6 +15,7 @@ Supported response types:
 
 - [Error responses](./docs/error.md) according to [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457.html)
 - [Service health](./docs/health.md)
+- Crockford Base32 Identifiers [identifiers](./docs/identifier.md)
 - Generic [single resource responses](./docs/resource.md)
 - Generic [collection responses](./docs/collection.md) including pagination support
 
