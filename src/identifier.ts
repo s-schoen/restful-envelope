@@ -29,8 +29,8 @@ export interface IdentifierFormatOptions {
   /** Whether to uppercase the formatted identifier. Defaults to `"lower"`, which preserves case. */
   case?: "lower" | "upper";
 
-  /** The right-aligned identifier block length, or zero to disable grouping. Defaults to 6. */
-  blockLengthChars?: number;
+  /** The left-aligned identifier block lengths. Defaults to [6, 6, 6, 6]. */
+  blockLengthsChars?: readonly number[];
 }
 
 /** Controls random identifier generation and its human-readable representation. */
@@ -53,7 +53,7 @@ export interface IdentifierParseOptions {
 const identifierFormatOptionsDefault = {
   calculateChecksum: false,
   case: "lower",
-  blockLengthChars: 6,
+  blockLengthsChars: [6, 6, 6, 6],
 } as const satisfies IdentifierFormatOptions;
 
 const identifierGenerateOptionsDefault = {
@@ -171,16 +171,21 @@ function encodeBase32(bytes: Uint8Array): string {
   return encoded;
 }
 
-function groupPayload(payload: string, blockLengthChars: number): string {
-  if (blockLengthChars === 0 || payload.length <= blockLengthChars) {
-    return payload;
+function groupPayload(payload: string, blockLengthsChars: readonly number[]): string {
+  const blockLengthSum = blockLengthsChars.reduce((sum, blockLength) => sum + blockLength, 0);
+
+  if (blockLengthSum !== payload.length) {
+    throw new TypeError(
+      `Identifier block lengths must sum to ${String(payload.length)}, but sum to ${String(blockLengthSum)}.`,
+    );
   }
 
-  const firstBlockLength = payload.length % blockLengthChars || blockLengthChars;
-  const blocks = [payload.slice(0, firstBlockLength)];
+  const blocks: string[] = [];
+  let offset = 0;
 
-  for (let offset = firstBlockLength; offset < payload.length; offset += blockLengthChars) {
-    blocks.push(payload.slice(offset, offset + blockLengthChars));
+  for (const blockLength of blockLengthsChars) {
+    blocks.push(payload.slice(offset, offset + blockLength));
+    offset += blockLength;
   }
 
   return blocks.join("-");
@@ -189,9 +194,10 @@ function groupPayload(payload: string, blockLengthChars: number): string {
 /**
  * Generates a cryptographically random Crockford Base32 identifier.
  *
- * The default payload contains 15 random bytes, uses six-character blocks, and has no checksum.
+ * The default payload contains 15 random bytes, uses four six-character blocks, and has no checksum.
  *
  * @throws {Error} When Web Crypto secure randomness is unavailable.
+ * @throws {TypeError} When the configured block lengths do not match the annotated payload length.
  */
 export function generateIdentifier(opts: IdentifierGenerateOptions = {}): string {
   const lengthBytes = opts.lengthBytes ?? identifierGenerateOptionsDefault.lengthBytes;
@@ -242,14 +248,17 @@ export function parseIdentifier(id: string, opts: IdentifierParseOptions = {}): 
 /**
  * Annotates a payload with optional checksum, grouping, collection, and uppercase formatting.
  *
- * The checksum is appended before the complete identifier is grouped from the right. A `"lower"`
+ * The checksum is appended before the complete identifier is grouped from the left. A `"lower"`
  * case option preserves the input casing; `"upper"` uppercases the formatted identifier.
+ *
+ * @throws {TypeError} When the configured block lengths do not match the annotated payload length.
  */
 export function annotateIdentifier(id: string, opts: IdentifierFormatOptions): string {
   const calculateChecksumOption =
     opts.calculateChecksum ?? identifierFormatOptionsDefault.calculateChecksum;
   const identifierCase = opts.case ?? identifierFormatOptionsDefault.case;
-  const blockLengthChars = opts.blockLengthChars ?? identifierFormatOptionsDefault.blockLengthChars;
+  const blockLengthsChars =
+    opts.blockLengthsChars ?? identifierFormatOptionsDefault.blockLengthsChars;
 
   const collectionPrefix = opts.collection ? `${opts.collection}/` : "";
   let identifier = "";
@@ -260,7 +269,7 @@ export function annotateIdentifier(id: string, opts: IdentifierFormatOptions): s
     identifier += calculateChecksum(identifier);
   }
 
-  const groupedIdentifier = groupPayload(identifier, blockLengthChars);
+  const groupedIdentifier = groupPayload(identifier, blockLengthsChars);
   const casedIdentifier =
     identifierCase === "upper" ? groupedIdentifier.toUpperCase() : groupedIdentifier;
 

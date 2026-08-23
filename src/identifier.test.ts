@@ -26,7 +26,7 @@ describe("annotateIdentifier", () => {
     expect(
       annotateIdentifier(value, {
         calculateChecksum: true,
-        blockLengthChars: 0,
+        blockLengthsChars: [3],
       }),
     ).toBe(expected);
   });
@@ -36,25 +36,39 @@ describe("annotateIdentifier", () => {
       annotateIdentifier("oIl", {
         calculateChecksum: false,
         case: "lower",
-        blockLengthChars: 0,
+        blockLengthsChars: [3],
       }),
     ).toBe("oIl");
     expect(
       annotateIdentifier("oIl", {
         calculateChecksum: false,
         case: "upper",
-        blockLengthChars: 0,
+        blockLengthsChars: [3],
       }),
     ).toBe("OIL");
   });
 
-  test("groups the complete annotated payload from the right", () => {
-    expect(annotateIdentifier("0123456789", {})).toBe("0123-456789");
-    expect(annotateIdentifier("123456", { calculateChecksum: true })).toBe("1-23456e");
+  test("groups the complete annotated payload from the left", () => {
+    expect(annotateIdentifier("01234567", { blockLengthsChars: [2, 4, 2] })).toBe("01-2345-67");
+    expect(
+      annotateIdentifier("123456", { calculateChecksum: true, blockLengthsChars: [1, 6] }),
+    ).toBe("1-23456e");
+  });
+
+  test("requires block lengths to cover the complete annotated payload", () => {
+    expect(() => annotateIdentifier("01234567", { blockLengthsChars: [2, 4] })).toThrow(TypeError);
+    expect(() =>
+      annotateIdentifier("01234567", {
+        calculateChecksum: true,
+        blockLengthsChars: [2, 4, 2],
+      }),
+    ).toThrow(TypeError);
   });
 
   test("adds a collection before the payload", () => {
-    expect(annotateIdentifier("10", { collection: "users" })).toBe("users/10");
+    expect(annotateIdentifier("10", { blockLengthsChars: [2], collection: "users" })).toBe(
+      "users/10",
+    );
   });
 
   test("exposes separate formatting, generation, and parsing options", () => {
@@ -64,13 +78,18 @@ describe("annotateIdentifier", () => {
     expectTypeOf<IdentifierParseOptions>().toHaveProperty("hasChecksum");
     expectTypeOf<IdentifierParseOptions>().toHaveProperty("normalizeSymbols");
     expectTypeOf<IdentifierParseOptions>().toHaveProperty("skipValidate");
+    expectTypeOf<IdentifierFormatOptions>().toHaveProperty("blockLengthsChars");
+    expectTypeOf<IdentifierFormatOptions>().not.toHaveProperty("blockLengthChars");
     expectTypeOf(annotateIdentifier).parameter(1).toEqualTypeOf<IdentifierFormatOptions>();
   });
 });
 
 describe("parseIdentifier", () => {
   test("parses a validated identifier without assuming a checksum", () => {
-    const id = annotateIdentifier("0123456789", { collection: "users" });
+    const id = annotateIdentifier("0123456789", {
+      blockLengthsChars: [4, 6],
+      collection: "users",
+    });
 
     expect(parseIdentifier(id)).toEqual({
       collection: "users",
@@ -161,7 +180,7 @@ describe("generateIdentifier", () => {
     };
     vi.stubGlobal("crypto", { getRandomValues });
 
-    expect(generateIdentifier({ lengthBytes: 1 })).toBe("00");
+    expect(generateIdentifier({ blockLengthsChars: [2], lengthBytes: 1 })).toBe("00");
     expect(generateIdentifier()).toBe("000000-000000-000000-000000");
     expect(calls).toBe(2);
   });
@@ -179,8 +198,8 @@ describe("generateIdentifier", () => {
     expect(
       generateIdentifier({
         calculateChecksum: false,
+        blockLengthsChars: [2],
         lengthBytes: 1,
-        blockLengthChars: 0,
       }),
     ).toBe("7Z");
   });
@@ -199,8 +218,8 @@ describe("generateIdentifier", () => {
       generateIdentifier({
         calculateChecksum: false,
         case: "upper",
+        blockLengthsChars: [5],
         lengthBytes: 3,
-        blockLengthChars: 0,
       }),
     ).toBe("028T5");
   });

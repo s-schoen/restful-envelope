@@ -28,16 +28,16 @@ import { generateIdentifier } from "@s-schoen/restful-envelope";
 const userId = generateIdentifier({ collection: "users" });
 ```
 
-By default, the payload contains 15 random bytes, is divided into six-character blocks, and does
-not include a checksum. Crockford encoding produces uppercase letters; the default `"lower"` case
-option preserves that casing. Set `case: "upper"` to uppercase a supplied payload during
+By default, the payload contains 15 random bytes, is divided into four six-character blocks, and
+does not include a checksum. Crockford encoding produces uppercase letters; the default `"lower"`
+case option preserves that casing. Set `case: "upper"` to uppercase a supplied payload during
 annotation.
 
 ```ts
 const compactId = generateIdentifier({
   calculateChecksum: true,
   case: "upper",
-  blockLengthChars: 0,
+  blockLengthsChars: [33],
   lengthBytes: 20,
 });
 ```
@@ -51,12 +51,28 @@ its symbols.
 ```ts
 import { annotateIdentifier } from "@s-schoen/restful-envelope";
 
-const id = annotateIdentifier("0123456789", { collection: "users" });
+const id = annotateIdentifier("0123456789", {
+  blockLengthsChars: [4, 6],
+  collection: "users",
+});
 // users/0123-456789
 ```
 
-The checksum is appended directly to the payload before grouping. Grouping is right-aligned across
-the complete payload and checksum.
+`blockLengthsChars` defines the block lengths from left to right. Its elements must sum to the
+complete payload length, including the checksum when `calculateChecksum` is enabled; otherwise,
+`annotateIdentifier()` throws a `TypeError`.
+
+```ts
+const id = annotateIdentifier("01234567", {
+  blockLengthsChars: [2, 4, 2],
+});
+// 01-2345-67
+```
+
+The checksum is appended directly to the payload before grouping. Use a single block containing
+the complete length, such as `blockLengthsChars: [10]`, to disable visible grouping. When supplying
+a custom `lengthBytes` value to `generateIdentifier()`, provide block lengths matching the encoded
+payload length.
 
 ## Parse An Identifier
 
